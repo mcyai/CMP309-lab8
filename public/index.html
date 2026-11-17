@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Information Server</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <h1>Web Programming Study Programme</h1>
+    <p>
+      This is a made-up study programme that teaches how the web works from both sides:
+      the browser and the server. Students learn HTTP, build their first Node.js and
+      Express back-end, and practise routes, status codes and middleware.
+    </p>
+    <p>
+      This small server hosts this page and a few API routes. Click a button below to
+      call a route with <code>fetch()</code> and see the status code and body of the response.
+    </p>
+
+    <section aria-label="API routes">
+      <h2>Try the API</h2>
+      <div class="buttons">
+        <button type="button" data-method="GET" data-url="/api/courses">GET /api/courses</button>
+        <button type="button" data-method="GET" data-url="/api/status">GET /api/status</button>
+        <button type="button" data-method="GET" data-url="/api/headers">GET /api/headers</button>
+        <button type="button" data-method="POST" data-url="/api/subscribe">POST /api/subscribe</button>
+        <button type="button" data-method="GET" data-url="/api/admin">GET /api/admin</button>
+        <button type="button" data-method="GET" data-url="/api/stats">GET /api/stats</button>
+        <button type="button" data-method="GET" data-url="/api/does-not-exist">GET /api/does-not-exist</button>
+      </div>
+    </section>
+
+    <section aria-label="Response">
+      <h2>Response</h2>
+      <p>Status: <strong id="status">-</strong></p>
+      <pre id="body">Click a button to see the response body here.</pre>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
