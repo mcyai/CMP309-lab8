@@ -1,0 +1,17 @@
+{
+  "name": "assignment_8_cmp309",
+  "version": "1.0.0",
+  "description": "A small Node.js and Express information server for a made-up study programme",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}
