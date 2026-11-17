@@ -45,6 +45,51 @@ app.get('/old-page', (req, res) => {
   res.redirect('/hello');
 });
 
+// Hard-coded data: there is no database in this project.
+const COURSES = [
+  { id: 1, title: 'Web Programming', credits: 6 },
+  { id: 2, title: 'Databases', credits: 5 },
+  { id: 3, title: 'Algorithms and Data Structures', credits: 6 },
+  { id: 4, title: 'Computer Networks', credits: 4 },
+];
+
+// JSON array of courses.
+app.get('/api/courses', (req, res) => {
+  res.json(COURSES);
+});
+
+// Real values from the running process.
+app.get('/api/status', (req, res) => {
+  res.json({
+    status: 'ok',
+    nodeVersion: process.version,
+    uptimeSeconds: Math.floor(process.uptime()),
+  });
+});
+
+// Echo two request headers back to the client.
+app.get('/api/headers', (req, res) => {
+  res.json({
+    'user-agent': req.get('User-Agent'),
+    accept: req.get('Accept'),
+  });
+});
+
+// 201 Created: a new subscription resource conceptually came into existence.
+app.post('/api/subscribe', (req, res) => {
+  res.status(201).json({ subscribed: true });
+});
+
+// 403 Forbidden: the server understood the request but refuses it.
+app.get('/api/admin', (req, res) => {
+  res.status(403).json({ error: 'Forbidden' });
+});
+
+// Number of requests counted by the requestCounter middleware.
+app.get('/api/stats', (req, res) => {
+  res.json({ requestsServed });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
