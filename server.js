@@ -1,3 +1,4 @@
+import path from 'node:path';
 import express from 'express';
 
 const app = express();
@@ -23,6 +24,26 @@ function requestCounter(req, res, next) {
 // Middleware must be registered before the routes so every request passes through them.
 app.use(requestLogger);
 app.use(requestCounter);
+
+// Serve the public/ folder. The path is built from this file's location,
+// so the server works no matter which folder it is started from.
+// express.static also serves public/index.html for GET /.
+app.use(express.static(path.join(import.meta.dirname, 'public')));
+
+// Plain text response.
+app.get('/hello', (req, res) => {
+  res.type('text/plain').send("Hello from cagri's server");
+});
+
+// Plain text file body with an explicit text/plain content type.
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain').send('User-agent: *\nDisallow: /api/admin\n');
+});
+
+// Redirect to /hello (302 Found by default).
+app.get('/old-page', (req, res) => {
+  res.redirect('/hello');
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
