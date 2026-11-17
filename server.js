@@ -90,6 +90,17 @@ app.get('/api/stats', (req, res) => {
   res.json({ requestsServed });
 });
 
+// 404 fallback. It must stay AFTER every route, otherwise it would hide them.
+// app.use without a path matches any request that no route above handled
+// (Express 5 does not accept the old app.get('*', ...) wildcard).
+app.use((req, res) => {
+  if (req.path.startsWith('/api')) {
+    res.status(404).json({ error: 'Not found' });
+  } else {
+    res.status(404).type('text/plain').send('404 - Page not found');
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
