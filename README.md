@@ -194,3 +194,32 @@ Keep-Alive: timeout=5
 User-agent: *
 Disallow: /api/admin
 ```
+
+## Reasoning questions
+
+**1. Route order.** I moved the 404 fallback to the top of `server.js`, right after the middleware. Every request, including `/hello`, `/api/courses` and `/`, then returned 404. Express runs handlers in the order they were registered, and the fallback matches every request and sends a response, so the routes below it were never reached.
+
+**2. Middleware.** I removed `next()` from the logger. The server printed the log line for the request, but nothing else happened: the request never moved on to the counter or to any route, so no response was sent. With `curl` the request hung until I stopped it after 4 seconds (curl exit code 28, timeout). A browser tab waits the same way, because the server neither answers nor closes the connection.
+
+**3. Status codes.** `POST /api/subscribe` creates something new, and `201 Created` says exactly that, while `200 OK` only says the request worked. Status codes are part of the protocol: browsers, `fetch` (`response.ok`), caches, search engines and monitoring tools read the code, not the body. A missing page with `200` and an error message would tell all of them that everything is fine.
+
+**4. Configuration.** Hosting platforms and other machines decide the port, and `3000` may already be used by another program. Reading `process.env.PORT` lets the same code run everywhere without editing it, and the `3000` fallback keeps local development simple.
+
+**5. Dependencies.** `node_modules` contains hundreds of files that anyone can regenerate, so committing it makes the repository big and noisy. `package.json` and `package-lock.json` already describe the exact packages and versions. After cloning, a teammate runs `npm install` and then `npm start`.
+
+**6. Same origin.** If the page is opened directly from disk, its address is `file:///...` and not `http://localhost:3000`, so the relative URL `/api/courses` would point to `file:///api/courses` and fail. Using the full address `http://localhost:3000/api/courses` instead would be a cross-origin request, which the browser blocks because of the **same-origin policy** (a server can allow it with CORS headers, which this assignment does not use).
+
+## Self-study notes
+
+- **Node version and running time.** The Node documentation for the `process` object shows `process.version` (for example `v22.20.0`) and `process.uptime()`, which returns the seconds since the process started as a decimal number. I use `Math.floor(process.uptime())` to get whole seconds for `uptimeSeconds`.
+- **Content type for plain text.** `res.send` with a string sets `text/html`. In the first version of `/hello` the header came out as `text/html`, which I noticed in the `curl` output. Express documents `res.type('text/plain')` (it also accepts values like `'json'` or `'html'`), so I chain `res.type('text/plain').send(...)` for `/hello`, `/robots.txt` and the text 404.
+- **Pretty JSON in the page.** `JSON.stringify(value, null, 2)` formats JSON with 2-space indentation. In `app.js` I first read the body as text, try `JSON.parse` and format it, and show it unchanged if it is not JSON. The result is written with `textContent` into a `<pre>` element.
+- **Absolute path for static files.** `express.static('public')` depends on the folder the server is started from. I use `path.join(import.meta.dirname, 'public')`, so it works from any folder (`import.meta.dirname` is available in ES modules in current Node versions, replacing `__dirname`).
+- **Express 5 fallback.** Express 5 does not accept `app.get('*', ...)`. A handler registered with `app.use(...)` without a path, placed after all routes, handles every unmatched request.
+
+## Challenges I faced
+
+- `/hello` returned `text/html` at first because `res.send` guesses the type from the value. I found it by reading the headers with `curl --include` and fixed it with `res.type('text/plain')`.
+- Express 5 changed wildcard routing, so the Express 4 style `app.get('*')` for the 404 fallback does not work. I used a path-less `app.use` registered last.
+- Understanding why the middleware order matters: `express.static` ends the request when it finds a file, so the logger and counter had to be registered before it.
+- The experiments (fallback at the top, logger without `next()`) were done on temporary copies of `server.js`, so the final server stays unchanged.
